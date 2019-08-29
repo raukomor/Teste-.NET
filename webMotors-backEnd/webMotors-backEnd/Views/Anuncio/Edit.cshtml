@@ -1,0 +1,185 @@
+﻿@model webMotors_backEnd.Models.anuncio
+
+@{
+    ViewBag.Title = "Edit";
+}
+    
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>anuncio</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.ID)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.marca, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.marca, Enumerable.Empty<SelectListItem>(), "", htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.marca, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.modelo, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.modelo, Enumerable.Empty<SelectListItem>(), "", htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.modelo, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.versao, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.versao, Enumerable.Empty<SelectListItem>(), "", htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.versao, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ano, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ano, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ano, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.quilometragem, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.quilometragem, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.quilometragem, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.text, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.text, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.text, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+
+        $(document).ready(function () {
+            getMarca(true);
+        });
+
+        const getMarca = (first=false) => {
+            $.ajax({
+                type: "GET",
+                url: "/Anuncio/getMarca",
+                contentType: "application/json; charset=utf-8",
+                datatype: 'JSON',
+                contentType: "application/json; charset=utf-8",
+                success: (data) => {
+                    let dt = JSON.parse(data);
+
+                    $("#marca").empty();
+
+                    $.each(dt, (i, row) => {
+                        $("#marca").append(`<option key="${row.ID}" value="${row.Name}">${row.Name}</option>`);
+                    })
+
+                    if (first) {
+                        $('#marca option:contains("@Model.marca")').attr('selected', 'selected');
+                        getModel(true);
+                        console.log('marca');
+                    }
+                    else {
+                        $("#marca").trigger("change");
+                    }
+
+                },
+                error: (xhr, status, error) => {
+                    $("#dataDiv").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                }
+            });
+        }
+
+        const getModel = (first=false) => {
+
+            $.ajax({
+                type: "POST",
+                url: "/Anuncio/getModel",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ markId: $("#marca option:selected").attr("key") }),
+                datatype: 'JSON',
+                contentType: "application/json; charset=utf-8",
+                success: (data) => {
+                    let dt = JSON.parse(data);
+
+                    $("#modelo").empty();
+
+                    $.each(dt, (i, row) => {
+                        $("#modelo").append(`<option key="${row.ID}" value="${row.Name}">${row.Name}</option>`);
+                    })
+
+                    if (first) {
+                        $('#modelo option:contains("@Model.modelo")').attr('selected', 'selected');
+                        getVersion(true);
+
+                    }
+                    else {
+                        $("#modelo").trigger("change");
+                    }
+
+                },
+                error: (xhr, status, error) => {
+                    $("#dataDiv").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                }
+            });
+
+        }
+
+        const getVersion = (first = false) => {
+
+            $.ajax({
+                type: "POST",
+                url: "/Anuncio/getVersion",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ modelId: $("#modelo option:selected").attr("key") }),
+                datatype: 'JSON',
+                contentType: "application/json; charset=utf-8",
+                success: (data) => {
+                    let dt = JSON.parse(data);
+
+                    $("#versao").empty();
+
+                    $.each(dt, (i, row) => {
+                        $("#versao").append(`<option key="${row.ID}" value="${row.Name}">${row.Name}</option>`);
+                    })
+
+                    if (first) {
+                        $("#versao option:contains('@Model.versao.ToString()')").attr('selected', 'selected');
+                    }
+                },
+                error: (xhr, status, error) => {
+                    $("#dataDiv").html("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                }
+            });
+        }
+
+        $("#modelo").change(() => { getVersion(); });
+        $("#marca").change(() => { getModel(); });
+    </script>
+}
